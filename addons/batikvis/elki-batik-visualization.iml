@@ -40,9 +40,8 @@
     <orderEntry type="module" module-name="elki-core-util" />
     <orderEntry type="module" module-name="elki-core-dbids" />
     <orderEntry type="module" module-name="elki-core-dbids-int" scope="RUNTIME" />
-    <orderEntry type="module" module-name="elki-docutil" />
-    <orderEntry type="library" name="Maven: com.github.javaparser:javaparser-core:2.3.0" level="project" />
     <orderEntry type="module" module-name="elki-gui-minigui" />
+    <orderEntry type="module" module-name="elki-docutil" scope="TEST" />
     <orderEntry type="module" module-name="elki-uncertain" />
   </component>
 </module>
