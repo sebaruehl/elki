@@ -462,6 +462,22 @@ public final class VMath {
   }
 
   /**
+   * Computes v1 * v2
+   *
+   * @param v1 original vector
+   * @param v2 the vector to be multiplied
+   * @return v1 * v2
+   */
+  public static final double[] times(final double[] v1, final double[] v2) {
+    assert (v1.length == v2.length) : ERR_VEC_DIMENSIONS;
+    final double[] v = new double[v1.length];
+    for(int i = 0; i < v1.length; i++) {
+      v[i] = v1[i] * v2[i];
+    }
+    return v;
+  }
+
+  /**
    * Computes v1 = v1 * s1, overwriting v1
    * 
    * @param v1 original vector
@@ -1750,4 +1766,30 @@ public final class VMath {
     double a = Math.sqrt((s / e1) * (s / e2));
     return (a < 1.) ? a : 1.;
   }
+
+  /**
+   * Compute the sum of all elements of a vecotr.
+   *
+   * @param v1 vector
+   * @return Sum
+   */
+  public static double sum_elements(double[] v1) {
+    double sum=0;
+    for( double i : v1) {
+      sum += i;
+    }
+    return sum;
+  }
+
+  /**
+   * Computes the square of all values of v
+   *
+   * @param v vector
+   * @return v1 square
+   */
+  public static final double[] square(final double[] v) {
+    return times(v, v);
+  }
+
+
 }
