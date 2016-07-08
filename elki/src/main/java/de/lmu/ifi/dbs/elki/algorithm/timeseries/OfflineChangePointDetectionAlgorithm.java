@@ -3,6 +3,7 @@ package de.lmu.ifi.dbs.elki.algorithm.timeseries;
 import de.lmu.ifi.dbs.elki.algorithm.AbstractAlgorithm;
 import de.lmu.ifi.dbs.elki.data.DoubleVector;
 import de.lmu.ifi.dbs.elki.data.LabelList;
+import de.lmu.ifi.dbs.elki.data.SparseDoubleVector;
 import de.lmu.ifi.dbs.elki.data.type.TypeInformation;
 import de.lmu.ifi.dbs.elki.data.type.TypeUtil;
 import de.lmu.ifi.dbs.elki.database.Database;
@@ -17,6 +18,7 @@ import de.lmu.ifi.dbs.elki.utilities.optionhandling.OptionID;
 import de.lmu.ifi.dbs.elki.utilities.optionhandling.constraints.CommonConstraints;
 import de.lmu.ifi.dbs.elki.utilities.optionhandling.parameterization.Parameterization;
 import de.lmu.ifi.dbs.elki.utilities.optionhandling.parameters.IntParameter;
+import jdk.internal.dynalink.support.TypeUtilities;
 
 import java.util.*;
 
@@ -30,19 +32,33 @@ public class OfflineChangePointDetectionAlgorithm extends AbstractAlgorithm<Chan
     }
 
     public ChangePointDetectionResult run(Database database) {
-        Relation<DoubleVector> relation = database.getRelation(TypeUtil.NUMBER_VECTOR_FIELD);
+        Relation<SparseDoubleVector> relation = database.getRelation(TypeUtil.NUMBER_VECTOR_VARIABLE_LENGTH);
         Relation<LabelList> labellist = database.getRelation(TypeUtil.LABELLIST);
 
         List<ChangePoints> result = new ArrayList<>();
 
-        for(DBIDIter realtion_iter = relation.getDBIDs().iter(), label_iter = labellist.getDBIDs().iter()
+        final int units = 100;
+        final int label_cnt = 6627;
+
+        int inverall = relation.size() / units;
+
+        String info = relation.getDataTypeInformation().toString();
+        double[] tmp_v = new double[label_cnt];
+        for(DBIDIter iter = relation.getDBIDs().iter(); iter.valid(); iter.advance()){
+            SparseDoubleVector tmp = relation.get(iter);
+            DBIDIter abb = relation.get(iter).;
+            int dim = tmp.getDimensionality();
+            //double test = tmp.iterDoubleValue();
+            double[] tmp2 = tmp.toArray();
+        }
+        /*for(DBIDIter realtion_iter = relation.getDBIDs().iter(), label_iter = labellist.getDBIDs().iter()
             ; realtion_iter.valid()
             ; realtion_iter.advance(), label_iter.advance()) {
 
             result.add(new ChangePoints(
                     multiple_changepoints_with_confidence(relation.get(realtion_iter).getValues(), confidence, bootstrap_steps)
                     , labellist.get(label_iter).toString()));
-        }
+        }*/
 
         return new ChangePointDetectionResult("Change Point List", "changepoints", result);
     }
