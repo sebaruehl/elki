@@ -4,7 +4,7 @@ package de.lmu.ifi.dbs.elki.math.statistics.distribution;
  This file is part of ELKI:
  Environment for Developing KDD-Applications Supported by Index-Structures
 
- Copyright (C) 2015
+ Copyright (C) 2016
  Ludwig-Maximilians-Universität München
  Lehr- und Forschungseinheit für Datenbanksysteme
  ELKI Development Team
@@ -89,6 +89,11 @@ public class CauchyDistribution extends AbstractDistribution {
   }
 
   @Override
+  public double logpdf(double x) {
+    return logpdf(x, location, shape);
+  }
+
+  @Override
   public double cdf(double x) {
     return cdf(x, location, shape);
   }
@@ -114,7 +119,20 @@ public class CauchyDistribution extends AbstractDistribution {
    */
   public static double pdf(double x, double location, double shape) {
     final double v = (x - location) / shape;
-    return 1. / Math.PI * shape * (1 + v * v);
+    return 1. / (Math.PI * shape * (1 + v * v));
+  }
+
+  /**
+   * PDF function, static version.
+   * 
+   * @param x Value
+   * @param location Location (x0)
+   * @param shape Shape (gamma)
+   * @return PDF value
+   */
+  public static double logpdf(double x, double location, double shape) {
+    final double v = (x - location) / shape;
+    return -Math.log(Math.PI * shape * (1 + v * v));
   }
 
   /**
@@ -138,7 +156,11 @@ public class CauchyDistribution extends AbstractDistribution {
    * @return PDF value
    */
   public static double quantile(double x, double location, double shape) {
-    return location + shape * Math.tan(Math.PI * (x - .5));
+    return (x <= .5) ? (x == .5) ? location //
+        : (x == 0.) ? Double.NEGATIVE_INFINITY //
+            : location - shape / Math.tan(Math.PI * x) //
+        : (x == 1.) ? Double.POSITIVE_INFINITY //
+            : location + shape / Math.tan(Math.PI * (1 - x));
   }
 
   @Override
@@ -167,12 +189,12 @@ public class CauchyDistribution extends AbstractDistribution {
       super.makeOptions(config);
 
       DoubleParameter locP = new DoubleParameter(LOCATION_ID);
-      if (config.grab(locP)) {
+      if(config.grab(locP)) {
         location = locP.doubleValue();
       }
 
       DoubleParameter shapeP = new DoubleParameter(SHAPE_ID);
-      if (config.grab(shapeP)) {
+      if(config.grab(shapeP)) {
         shape = shapeP.doubleValue();
       }
     }

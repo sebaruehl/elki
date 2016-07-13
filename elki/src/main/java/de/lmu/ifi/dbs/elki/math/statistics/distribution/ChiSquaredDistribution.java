@@ -4,7 +4,7 @@ package de.lmu.ifi.dbs.elki.math.statistics.distribution;
  This file is part of ELKI:
  Environment for Developing KDD-Applications Supported by Index-Structures
 
- Copyright (C) 2015
+ Copyright (C) 2016
  Ludwig-Maximilians-Universität München
  Lehr- und Forschungseinheit für Datenbanksysteme
  ELKI Development Team
@@ -22,8 +22,10 @@ package de.lmu.ifi.dbs.elki.math.statistics.distribution;
  You should have received a copy of the GNU Affero General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import java.util.Random;
 
+import de.lmu.ifi.dbs.elki.math.MathUtil;
 import de.lmu.ifi.dbs.elki.utilities.documentation.Reference;
 import de.lmu.ifi.dbs.elki.utilities.optionhandling.OptionID;
 import de.lmu.ifi.dbs.elki.utilities.optionhandling.parameterization.Parameterization;
@@ -85,17 +87,37 @@ public class ChiSquaredDistribution extends GammaDistribution {
    * @return probability density
    */
   public static double pdf(double x, double dof) {
-    if (x <= 0) {
+    if(x <= 0) {
       return 0.0;
     }
-    if (x == 0) {
-      return 0.0;
+    if(dof <= 0) {
+      return Double.NaN;
     }
     final double k = dof * .5;
-    if (Math.abs(k - 1.0) < Double.MIN_NORMAL) {
+    if(Math.abs(k - 1.0) < Double.MIN_NORMAL) {
       return Math.exp(-x * 2.0) * 2.0;
     }
     return Math.exp((k - 1.0) * Math.log(x * 2.0) - x * 2.0 - logGamma(k)) * 2.0;
+  }
+
+  /**
+   * Chi-Squared distribution PDF (with 0.0 for x &lt; 0)
+   * 
+   * @param x query value
+   * @param dof Degrees of freedom.
+   * @return probability density
+   */
+  public static double logpdf(double x, double dof) {
+    if(x <= 0) {
+      return Double.NEGATIVE_INFINITY;
+    }
+    if(dof <= 0) {
+      return Double.NaN;
+    }
+    final double k = dof * .5;
+    final double twox = x * 2.0;
+    return twox == Double.POSITIVE_INFINITY ? Double.NEGATIVE_INFINITY : //
+        (k - 1.0) * Math.log(twox) - twox - logGamma(k) + MathUtil.LOG2;
   }
 
   /**
@@ -143,7 +165,7 @@ public class ChiSquaredDistribution extends GammaDistribution {
       super.makeOptions(config);
 
       DoubleParameter dofP = new DoubleParameter(DOF_ID);
-      if (config.grab(dofP)) {
+      if(config.grab(dofP)) {
         dof = dofP.doubleValue();
       }
     }

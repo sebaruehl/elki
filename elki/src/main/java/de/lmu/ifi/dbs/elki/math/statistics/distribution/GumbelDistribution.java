@@ -4,7 +4,7 @@ package de.lmu.ifi.dbs.elki.math.statistics.distribution;
  This file is part of ELKI:
  Environment for Developing KDD-Applications Supported by Index-Structures
 
- Copyright (C) 2015
+ Copyright (C) 2016
  Ludwig-Maximilians-Universität München
  Lehr- und Forschungseinheit für Datenbanksysteme
  ELKI Development Team
@@ -83,7 +83,7 @@ public class GumbelDistribution extends AbstractDistribution {
   }
 
   /**
-   * PDF of Weibull distribution
+   * PDF of Gumbel distribution
    * 
    * @param x Value
    * @param mu Mode
@@ -92,6 +92,9 @@ public class GumbelDistribution extends AbstractDistribution {
    */
   public static double pdf(double x, double mu, double beta) {
     final double z = (x - mu) / beta;
+    if(x == Double.NEGATIVE_INFINITY) {
+      return 0.;
+    }
     return Math.exp(-z - Math.exp(-z)) / beta;
   }
 
@@ -101,7 +104,28 @@ public class GumbelDistribution extends AbstractDistribution {
   }
 
   /**
-   * CDF of Weibull distribution
+   * log PDF of Gumbel distribution
+   * 
+   * @param x Value
+   * @param mu Mode
+   * @param beta Shape
+   * @return PDF at position x.
+   */
+  public static double logpdf(double x, double mu, double beta) {
+    if(x == Double.NEGATIVE_INFINITY) {
+      return Double.NEGATIVE_INFINITY;
+    }
+    final double z = (x - mu) / beta;
+    return -z - Math.exp(-z) - Math.log(beta);
+  }
+
+  @Override
+  public double logpdf(double x) {
+    return logpdf(x, mu, beta);
+  }
+
+  /**
+   * CDF of Gumbel distribution
    * 
    * @param val Value
    * @param mu Mode
@@ -118,7 +142,7 @@ public class GumbelDistribution extends AbstractDistribution {
   }
 
   /**
-   * Quantile function of Weibull distribution
+   * Quantile function of Gumbel distribution
    * 
    * @param val Value
    * @param mu Mode
@@ -160,12 +184,12 @@ public class GumbelDistribution extends AbstractDistribution {
       super.makeOptions(config);
 
       DoubleParameter meanP = new DoubleParameter(LOCATION_ID);
-      if (config.grab(meanP)) {
+      if(config.grab(meanP)) {
         mean = meanP.doubleValue();
       }
 
       DoubleParameter shapeP = new DoubleParameter(SHAPE_ID);
-      if (config.grab(shapeP)) {
+      if(config.grab(shapeP)) {
         shape = shapeP.doubleValue();
       }
     }

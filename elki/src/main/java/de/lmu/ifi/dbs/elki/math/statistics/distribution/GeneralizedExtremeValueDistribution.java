@@ -4,7 +4,7 @@ package de.lmu.ifi.dbs.elki.math.statistics.distribution;
  This file is part of ELKI:
  Environment for Developing KDD-Applications Supported by Index-Structures
 
- Copyright (C) 2015
+ Copyright (C) 2016
  Ludwig-Maximilians-Universität München
  Lehr- und Forschungseinheit für Datenbanksysteme
  ELKI Development Team
@@ -89,6 +89,11 @@ public class GeneralizedExtremeValueDistribution extends AbstractDistribution {
     this.k = k;
   }
 
+  @Override
+  public double pdf(double x) {
+    return pdf(x, mu, sigma, k);
+  }
+
   /**
    * PDF of GEV distribution
    * 
@@ -99,21 +104,56 @@ public class GeneralizedExtremeValueDistribution extends AbstractDistribution {
    * @return PDF at position x.
    */
   public static double pdf(double x, double mu, double sigma, double k) {
+    if(x == Double.POSITIVE_INFINITY || x == Double.NEGATIVE_INFINITY) {
+      return 0.;
+    }
     x = (x - mu) / sigma;
-    if (k > 0 || k < 0) {
-      if (k * x < -1) {
+    if(k > 0 || k < 0) {
+      if(k * x < -1) {
         return 0.;
       }
       final double tx = Math.pow(1 + k * x, -1. / k);
       return Math.pow(tx, k + 1) * Math.exp(-tx) / sigma;
-    } else { // Gumbel case:
+    }
+    else { // Gumbel case:
       return Math.exp(-x - Math.exp(-x)) / sigma;
     }
   }
 
   @Override
-  public double pdf(double x) {
-    return pdf(x, mu, sigma, k);
+  public double logpdf(double x) {
+    return logpdf(x, mu, sigma, k);
+  }
+
+  /**
+   * log PDF of GEV distribution
+   * 
+   * @param x Value
+   * @param mu Location parameter mu
+   * @param sigma Scale parameter sigma
+   * @param k Shape parameter k
+   * @return PDF at position x.
+   */
+  public static double logpdf(double x, double mu, double sigma, double k) {
+    if(x == Double.POSITIVE_INFINITY || x == Double.NEGATIVE_INFINITY) {
+      return Double.NEGATIVE_INFINITY;
+    }
+    x = (x - mu) / sigma;
+    if(k > 0 || k < 0) {
+      if(k * x < -1) {
+        return Double.NEGATIVE_INFINITY;
+      }
+      final double tx = Math.pow(1 + k * x, -1. / k);
+      return (k == -1 ? 0 : Math.log(tx) * (k + 1)) - tx - Math.log(sigma);
+    }
+    else { // Gumbel case:
+      return -x - Math.exp(-x) - Math.log(sigma);
+    }
+  }
+
+  @Override
+  public double cdf(double val) {
+    return cdf(val, mu, sigma, k);
   }
 
   /**
@@ -127,19 +167,20 @@ public class GeneralizedExtremeValueDistribution extends AbstractDistribution {
    */
   public static double cdf(double val, double mu, double sigma, double k) {
     final double x = (val - mu) / sigma;
-    if (k > 0 || k < 0) {
-      if (k * x <= -1) {
+    if(k > 0 || k < 0) {
+      if(k * x <= -1) {
         return (k > 0) ? 0 : 1;
       }
       return Math.exp(-Math.pow(1 + k * x, -1. / k));
-    } else { // Gumbel case:
+    }
+    else { // Gumbel case:
       return Math.exp(-Math.exp(-x));
     }
   }
 
   @Override
-  public double cdf(double val) {
-    return cdf(val, mu, sigma, k);
+  public double quantile(double val) {
+    return quantile(val, mu, sigma, k);
   }
 
   /**
@@ -152,21 +193,18 @@ public class GeneralizedExtremeValueDistribution extends AbstractDistribution {
    * @return Quantile function at position x.
    */
   public static double quantile(double val, double mu, double sigma, double k) {
-    if (val < 0.0 || val > 1.0) {
+    if(val < 0.0 || val > 1.0) {
       return Double.NaN;
     }
-    if (k > 0) {
+    if(k > 0) {
       return mu + sigma * Math.max((Math.pow(-Math.log(val), -k) - 1.) / k, -1. / k);
-    } else if (k < 0) {
+    }
+    else if(k < 0) {
       return mu + sigma * Math.min((Math.pow(-Math.log(val), -k) - 1.) / k, -1. / k);
-    } else { // Gumbel
+    }
+    else { // Gumbel
       return mu + sigma * Math.log(1. / Math.log(1. / val));
     }
-  }
-
-  @Override
-  public double quantile(double val) {
-    return quantile(val, mu, sigma, k);
   }
 
   @Override
@@ -190,17 +228,17 @@ public class GeneralizedExtremeValueDistribution extends AbstractDistribution {
       super.makeOptions(config);
 
       DoubleParameter muP = new DoubleParameter(LOCATION_ID);
-      if (config.grab(muP)) {
+      if(config.grab(muP)) {
         mu = muP.doubleValue();
       }
 
       DoubleParameter sigmaP = new DoubleParameter(SCALE_ID);
-      if (config.grab(sigmaP)) {
+      if(config.grab(sigmaP)) {
         sigma = sigmaP.doubleValue();
       }
 
       DoubleParameter kP = new DoubleParameter(SHAPE_ID);
-      if (config.grab(kP)) {
+      if(config.grab(kP)) {
         k = kP.doubleValue();
       }
     }
