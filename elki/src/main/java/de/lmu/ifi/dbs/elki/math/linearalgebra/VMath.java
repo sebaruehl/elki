@@ -1787,7 +1787,7 @@ public final class VMath {
    * @param v1 vector
    * @return Sum
    */
-  public static double sum_elements(double[] v1) {
+  public static double sumElements(double[] v1) {
     double sum=0;
     for( double i : v1) {
       sum += i;
